@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  notifications:
+    build: .
+    container_name: notifications-service
+    restart: unless-stopped
+    environment:
+      - PORT=8080
+      - MONGO_URI=${MONGO_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - SERVICE_NAME=${SERVICE_NAME}
+    ports:
+      - "8080:8080"
