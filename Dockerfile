@@ -1,18 +1,36 @@
-# --- base builder ---
-FROM node:20-slim AS builder
+# ============================
+# Stage 1: Build
+# ============================
+FROM node:20-alpine AS builder
+
+RUN apk add --no-cache openssl
+
 WORKDIR /app
-COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
-RUN if [ -f package-lock.json ]; then npm ci;     elif [ -f pnpm-lock.yaml ]; then npm i -g pnpm && pnpm i --frozen-lockfile;     elif [ -f yarn.lock ]; then yarn --frozen-lockfile;     else npm i; fi
-COPY tsconfig.json ./
-COPY src ./src
+
+COPY package*.json tsconfig.json ./
+
+RUN npm ci
+
+COPY . .
+
 RUN npm run build
 
-# --- runtime ---
-FROM node:20-slim
-ENV NODE_ENV=production
+# ============================
+# Stage 2: Production image
+# ============================
+FROM node:20-alpine AS runner
+
 WORKDIR /app
+
+RUN apk add --no-cache openssl
+
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-EXPOSE 8080
+
+ENV NODE_ENV=production
+ENV PORT=4003
+
+EXPOSE 4003
+
 CMD ["node", "dist/server.js"]

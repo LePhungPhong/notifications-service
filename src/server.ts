@@ -1,14 +1,12 @@
 // src/server.ts
 import http from "http";
-import dotenv from "dotenv";
 import app from "./app.js";
 import { connectMongo } from "./config/mongo.js";
 import { initSocket } from "./sockets/notification.gateway.js";
 
-dotenv.config();
-
-const PORT = parseInt(process.env.PORT || "8080", 10);
-const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/notifications_db";
+const PORT = Number(process.env.PORT);
+const MONGO_URI =
+  process.env.MONGO_URI || "mongodb://localhost:27017/notifications_db";
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
 
 async function start() {
