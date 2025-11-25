@@ -1,11 +1,10 @@
 import { FilterQuery } from "mongoose";
 import { Notification, INotification } from "../models/Notification.js";
-import AppError from "../utils/error/AppError.js";
-import httpStatusCode from "../response/httpStatusCode.js";
-import errorCodes from "../constants/errorCodes.js";
 
-
-export const createNotification = async (payload: Partial<INotification>, dedupe = true) => {
+export const createNotification = async (
+  payload: Partial<INotification>,
+  dedupe = true
+) => {
   if (dedupe) {
     try {
       // try unique upsert on (userId,type,actorId,entityId)
@@ -35,12 +34,21 @@ export const createNotification = async (payload: Partial<INotification>, dedupe
   return doc.toObject();
 };
 
-export const listNotifications = async (userId: string, opts: { page?: number; limit?: number; unread?: boolean } = {}) => {
+export const listNotifications = async (
+  userId: string,
+  opts: { page?: number; limit?: number; unread?: boolean } = {}
+) => {
   const { page = 1, limit = 20, unread = false } = opts;
   const q: FilterQuery<INotification> = { userId };
   if (unread) q.isRead = false;
-  const cursor = Notification.find(q).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit);
-  const [items, total] = await Promise.all([cursor.lean(), Notification.countDocuments(q)]);
+  const cursor = Notification.find(q)
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit);
+  const [items, total] = await Promise.all([
+    cursor.lean(),
+    Notification.countDocuments(q),
+  ]);
   return { items, pagination: { page, limit, total } };
 };
 
@@ -54,7 +62,10 @@ export const markRead = async (userId: string, id: string) => {
 };
 
 export const markAllRead = async (userId: string) => {
-  const res = await Notification.updateMany({ userId, isRead: false }, { $set: { isRead: true, readAt: new Date() } });
+  const res = await Notification.updateMany(
+    { userId, isRead: false },
+    { $set: { isRead: true, readAt: new Date() } }
+  );
   return { matched: res.matchedCount, modified: res.modifiedCount };
 };
 

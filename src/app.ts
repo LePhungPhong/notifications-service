@@ -1,14 +1,23 @@
 // src/app.ts
 import express, { Application, NextFunction, Request, Response } from "express";
-import notifRoutes from "./routes/notification.routes.js";
-import GlobalError from "./middlewares/GlobalError.js";
-import AppError from "./utils/error/AppError.js";
-import { HTTP_STATUS } from "./response/httpStatusCode.js";
-import { sendResponse } from "./response/apiResponse.js";
+import cookieParser from "cookie-parser";
+import notifRoutes from "./routes/notification.routes";
+import GlobalError from "./middlewares/GlobalError";
+import AppError from "./utils/error/AppError";
+import { HTTP_STATUS } from "./response/httpStatusCode";
+import { sendResponse } from "./response/apiResponse";
+import helmet from "helmet";
 
 const app: Application = express();
 
+app.use((_, __, next) => {
+  console.log("run");
+  next();
+});
+
 // Core middleware
+app.use(helmet()); // Bảo mật HTTP headers
+app.use(cookieParser()); // Parse cookie
 app.use(express.json());
 
 // Healthcheck
@@ -20,7 +29,7 @@ app.get("/api/v1/notifications/health", (_req: Request, res: Response) =>
 app.use("/api/v1/notifications", notifRoutes);
 
 // 404
-app.all("*", (req: Request, _res: Response, next: NextFunction) => {
+app.all("*path", (req: Request, _res: Response, next: NextFunction) => {
   next(
     new AppError(`Route ${req.originalUrl} not found`, HTTP_STATUS.NOT_FOUND)
   );
