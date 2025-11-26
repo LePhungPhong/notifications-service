@@ -9,13 +9,15 @@ cp .env.example .env
 docker compose up --build
 ```
 
-- API: http://localhost:8080
-- Mongo Express: http://localhost:8081
+- API: https://localhost:8080
+- Mongo Express: https://localhost:8081
 
 ## API
 
 ### Tạo thông báo
+
 `POST /api/notifications`
+
 ```json
 {
   "userId": "receiver-123",
@@ -31,31 +33,39 @@ docker compose up --build
 ```
 
 ### Danh sách thông báo
+
 `GET /api/notifications?userId=receiver-123&unread=true&page=1&limit=20`
 
 ### Đánh dấu đã đọc
+
 `PATCH /api/notifications/:id/read` (yêu cầu header `X-User-Id`)
 
 ### Đánh dấu tất cả đã đọc
+
 `PATCH /api/notifications/read-all?userId=receiver-123`
 
 ### Xoá 1 thông báo
+
 `DELETE /api/notifications/:id` (yêu cầu header `X-User-Id`)
 
 ## Realtime (Socket.io)
+
 Client kết nối:
+
 ```js
 import { io } from "socket.io-client";
-const s = io("http://localhost:8080", { query: { userId: "receiver-123" } });
+const s = io("https://localhost:8080", { query: { userId: "receiver-123" } });
 s.on("notification:new", (n) => console.log("new notification", n));
 ```
 
 ## Tích hợp vào web hiện có
+
 - Gọi `POST /api/notifications` từ các sự kiện: like, comment, follow, mention...
 - Ở frontend, hiện badge đếm `unread`. Định kỳ gọi `GET /api/notifications?unread=true` hoặc dùng socket.
 - Lưu ý: có chỉ số unique `(userId, type, actorId, entityId)` để tránh trùng.
 
 ## Dev local (không Docker)
+
 ```bash
 npm i
 npm run dev
